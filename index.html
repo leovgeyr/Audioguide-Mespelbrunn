@@ -25,11 +25,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Georgia,serif;backg
 .lb.on{background:#A0522D;border-color:#A0522D;color:#FDFAF5;font-weight:700}
 
 /* ROOM GRID */
-.room-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:3px;padding-bottom:10px}
-.rg{padding:4px 2px;border-radius:6px;border:1.5px solid #C4A882;background:transparent;color:#8B6F47;font-size:10px;cursor:pointer;text-align:center;transition:all .15s;min-height:36px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px}
+.room-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding-bottom:10px}
+.rg{padding:6px 4px;border-radius:8px;border:1.5px solid #C4A882;background:transparent;color:#8B6F47;font-size:10.5px;cursor:pointer;text-align:center;transition:all .15s;min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1.2;font-family:-apple-system,sans-serif}
 .rg.on{background:#A0522D;border-color:#A0522D;color:#FDFAF5}
-.rg-num{font-weight:700;font-size:12px}
-.rg-icon{font-size:12px}
+.rg-num{font-weight:700;font-size:9px;opacity:.75;letter-spacing:.5px}
+.rg-label{font-weight:600}
 
 /* BODY */
 .body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 16px 24px;background:#F5EDD9}
@@ -39,12 +39,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Georgia,serif;backg
 
 /* ROOM HERO */
 .room-hero{background:#FDFAF5;border-radius:14px;border:1.5px solid #C4A882;margin-bottom:14px;overflow:hidden;box-shadow:0 2px 8px rgba(106,58,31,0.1)}
-.room-img{height:200px;background:#E8D9BA;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden}
-.room-img img{width:100%;height:100%;object-fit:cover;object-position:center 40%;position:absolute;top:0;left:0}
+.room-title-card{min-height:150px;background:linear-gradient(135deg,#EDE0C4,#D4B896);display:flex;align-items:center;justify-content:center;position:relative;padding:34px 18px}
 .room-badge{position:absolute;top:10px;left:12px;background:rgba(44,24,16,0.85);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:700;color:#F5EDD9;z-index:1;font-family:-apple-system,sans-serif}
-.room-emoji{font-size:56px;position:relative;z-index:1}
+.room-title-name{font-family:Georgia,serif;font-size:26px;font-weight:700;color:#2C1810;text-align:center;line-height:1.3}
 .room-body{padding:14px}
-.room-name{font-size:20px;font-weight:700;color:#2C1810;margin-bottom:3px;font-family:Georgia,serif}
 .room-sub{font-size:12px;color:#8B6F47;margin-bottom:10px;font-style:italic}
 .room-text{font-size:14px;color:#3D2010;line-height:1.8;max-height:84px;overflow:hidden;transition:max-height .3s}
 .room-text.open{max-height:800px}
@@ -91,7 +89,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Georgia,serif;backg
 
 /* PIN SCREEN */
 #pinScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:#F5EDD9;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px}
-.pin-castle{font-size:64px;margin-bottom:16px}
+.pin-crest{margin-bottom:16px;display:block}
 .pin-title{font-size:13px;font-weight:700;color:#6B3A1F;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;font-family:-apple-system,sans-serif}
 .pin-sub{font-size:13px;color:#8B6F47;margin-bottom:40px;text-align:center;font-family:-apple-system,sans-serif}
 .pin-dots{display:flex;gap:14px;margin-bottom:32px}
@@ -109,7 +107,32 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Georgia,serif;backg
 <body>
 
 <div id="pinScreen">
-  <div class="pin-castle">🏰</div>
+  <svg class="pin-crest" viewBox="0 0 120 140" width="110" height="128" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="crestGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#EDE0C4"/>
+        <stop offset="100%" stop-color="#C4A882"/>
+      </linearGradient>
+    </defs>
+    <path d="M60 6 C75 7 90 10 100 14 L106 17 L106 68 C106 85 104 96 96 103 C84 116 70 126 60 132 C50 126 36 116 24 103 C16 96 14 85 14 68 L14 17 L20 14 C30 10 45 7 60 6 Z"
+          fill="url(#crestGrad)" stroke="#6B3A1F" stroke-width="4" stroke-linejoin="round"/>
+    <g fill="#6B3A1F">
+      <rect x="38" y="52" width="44" height="52"/>
+      <rect x="30" y="38" width="14" height="22"/>
+      <rect x="76" y="38" width="14" height="22"/>
+      <rect x="52" y="28" width="16" height="28"/>
+      <rect x="28" y="34" width="5" height="7"/>
+      <rect x="40" y="34" width="5" height="7"/>
+      <rect x="74" y="34" width="5" height="7"/>
+      <rect x="86" y="34" width="5" height="7"/>
+      <rect x="53" y="22" width="5" height="7"/>
+      <rect x="63" y="22" width="5" height="7"/>
+    </g>
+    <rect x="53" y="76" width="14" height="24" fill="#EDE0C4"/>
+    <rect x="45" y="62" width="4" height="9" fill="#EDE0C4"/>
+    <rect x="71" y="62" width="4" height="9" fill="#EDE0C4"/>
+    <rect x="58" y="40" width="4" height="9" fill="#EDE0C4"/>
+  </svg>
   <div class="pin-title">Schloss Mespelbrunn</div>
   <div class="pin-sub">Audio Guide &mdash; Enter access code</div>
   <div class="pin-dots">
@@ -146,13 +169,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Georgia,serif;backg
 <div class="body" id="mainBody">
   <div class="tip"><span style="font-size:16px;flex-shrink:0">&#128161;</span><span id="tipText"></span></div>
   <div class="room-hero">
-    <div class="room-img">
+    <div class="room-title-card">
       <div class="room-badge" id="roomBadge">Room 1</div>
-      <img id="heroImg" src="" alt="Schloss Mespelbrunn" style="display:none">
-      <div class="room-emoji" id="roomEmoji"></div>
+      <div class="room-title-name" id="roomTitleName"></div>
     </div>
     <div class="room-body">
-      <div class="room-name" id="roomName"></div>
       <div class="room-sub" id="roomSub"></div>
       <div class="room-text" id="roomText"></div>
       <button class="read-more" id="readMoreBtn" onclick="toggleText()">Read more &#9660;</button>
@@ -373,6 +394,14 @@ function tickHighlight(){
 // Wird aufgerufen, wenn der Browser ein echtes Wort-Grenze-Event liefert.
 // Korrigiert die Hervorhebung sofort und gleicht die Zeitbasis ab, damit die
 // folgenden, rein zeitbasierten Schritte ab hier wieder genau im Takt sind.
+//
+// WICHTIG: Diese Events sind nicht immer verlässlich -- besonders bei ja/zh
+// kommen sie teils in falscher Reihenfolge oder mit veralteten Positionen an.
+// Ohne Schutz führt das zu "2 vor, 1 zurück"-Sprüngen. Deshalb gilt hier:
+// 1) Niemals rückwärts springen (ein "altes" Event wird einfach ignoriert,
+//    die zeitbasierte Schätzung läuft dann einfach unbeirrt weiter).
+// 2) Ein einzelner Vorwärts-Sprung ist auf wenige Einheiten begrenzt, damit
+//    ein einzelner fehlerhafter Wert nicht sofort ans Ende katapultiert.
 function correctHighlightFromBoundary(idx, charIndex){
   const meta = chunkTokenMeta[idx] || [];
   if(!meta.length) return;
@@ -381,6 +410,8 @@ function correctHighlightFromBoundary(idx, charIndex){
   for(let i=0;i<meta.length;i++){
     if(charIndex < meta[i].end){ k=i; break; }
   }
+  if(k < activeTokenIdx) return; // niemals zurückspringen
+  if(activeTokenIdx >= 0) k = Math.min(k, activeTokenIdx + 4); // Sprung begrenzen
   const frac = meta[k].start/totalLen;
   highlightStartTime = performance.now() - frac*highlightLocalTotalMs;
   setActiveToken(k);
@@ -536,11 +567,7 @@ function render(){
   buildHighlightMarkup();
   const total = totalDuration();
   document.getElementById("roomBadge").textContent = "Room "+r.id;
-  document.getElementById("heroImg").style.display="none";
-  const roomEmoji = document.getElementById("roomEmoji");
-  roomEmoji.style.display="block";
-  roomEmoji.textContent=r.icon;
-  document.getElementById("roomName").textContent = name;
+  document.getElementById("roomTitleName").textContent = name;
   document.getElementById("roomSub").textContent = r.subs[lang]||r.subs.en;
   document.getElementById("tipText").textContent = r.tips[lang]||r.tips.en;
   document.getElementById("roomText").classList.toggle("open",textOpen);
@@ -555,8 +582,8 @@ function render(){
   document.getElementById("nextBtn").disabled = cur===rooms.length-1;
   document.getElementById("roomGrid").innerHTML = rooms.map((rm,i)=>
     '<button class="rg'+(i===cur?" on":"")+'" onclick="goRoom('+i+')">'
-    +'<span class="rg-icon">'+rm.icon+'</span>'
-    +'<span class="rg-num">'+rm.id+'</span></button>'
+    +'<span class="rg-num">'+rm.id+'</span>'
+    +'<span class="rg-label">'+(rm.names[lang]||rm.names.en)+'</span></button>'
   ).join("");
 }
 
