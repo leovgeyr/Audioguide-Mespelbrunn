@@ -48,6 +48,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Georgia,serif;backg
 .room-sub{font-size:12px;color:#8B6F47;margin-bottom:10px;font-style:italic}
 .room-text{font-size:14px;color:#3D2010;line-height:1.8;max-height:84px;overflow:hidden;transition:max-height .3s}
 .room-text.open{max-height:800px}
+.hl-unit{border-radius:3px;padding:0 1px;transition:background-color .22s ease,color .15s ease}
+.hl-unit.active{background:#A0522D;color:#FDFAF5}
 .read-more{background:transparent;border:none;color:#A0522D;font-size:12px;cursor:pointer;margin-top:6px;padding:0;min-height:34px;display:block;font-family:-apple-system,sans-serif}
 
 /* PLAYER */
@@ -204,6 +206,16 @@ let cur=0, lang="en", playing=false, prog=0, ticker=null, keepAliveTimer=null, t
 let chunks=[], chunkDurs=[], chunkIdx=0;
 let touchStartX=0, touchStartY=0;
 
+// Mitlese-Highlighting: läuft fließend mit der Sprachausgabe mit.
+let chunkTokenMeta = [];      // pro Chunk: [{text,start,end}, ...] (Zeichen-Offsets im Chunk-Text)
+let highlightTokens = [];     // die aktuell sichtbaren <span>-Elemente des laufenden Chunks
+let highlightCumStart = [];   // Anteil [0..1] an der Chunk-Dauer, wo jedes Wort beginnt
+let highlightCumEnd = [];     // ... und wo es endet
+let highlightStartTime = 0;   // performance.now() beim Start des aktuellen Chunks
+let highlightLocalTotalMs = 1000;
+let highlightRAF = null;
+let activeTokenIdx = -1;
+
 function fmt(s){const m=Math.floor(s/60),sec=Math.floor(s%60);return m+":"+(sec<10?"0":"")+sec}
 
 // Zeichen-basierte Dauer-Schätzung statt Wort-Zählung (alte Methode hat für
@@ -270,7 +282,116 @@ function totalDuration(){
   return chunkDurs.reduce((a,b)=>a+b,0) || 1;
 }
 
+function escapeHtml(s){
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+// Zerlegt einen Chunk in "Highlight-Einheiten": bei Sprachen mit Leerzeichen
+// (en/fr/es/it) ein Wort pro Einheit, bei ja/zh (keine Leerzeichen zwischen
+// Wörtern) ein Zeichen pro Einheit -- zusammenhängende Ziffern/Lateinbuchstaben
+// (z.B. eine Jahreszahl) bleiben dabei als eine Einheit zusammen.
+function tokenizeChunk(text, isCJK){
+  const tokens = [];
+  const re = isCJK ? /[0-9A-Za-z]+|[^\s0-9A-Za-z]/g : /\S+/g;
+  let m;
+  while((m = re.exec(text)) !== null){
+    tokens.push({text:m[0], start:m.index, end:m.index+m[0].length});
+  }
+  return tokens;
+}
+
+// Baut den Inhalt von #roomText aus <span>-markierten Einheiten auf (statt
+// reinem Text), damit einzelne Wörter/Zeichen farblich hervorgehoben werden
+// können. chunkTokenMeta merkt sich dabei die Zeichen-Offsets, die später für
+// die Synchronisation mit der Sprachausgabe gebraucht werden.
+function buildHighlightMarkup(){
+  const isCJK = (lang === "ja" || lang === "zh");
+  chunkTokenMeta = [];
+  let html = "";
+  chunks.forEach((chunkText, ci)=>{
+    const tokens = tokenizeChunk(chunkText, isCJK);
+    chunkTokenMeta.push(tokens);
+    let pos = 0;
+    tokens.forEach((tok, ti)=>{
+      const gap = chunkText.slice(pos, tok.start);
+      html += escapeHtml(gap).replace(/\n/g, "<br>");
+      html += '<span class="hl-unit" data-chunk="'+ci+'" data-unit="'+ti+'">'+escapeHtml(tok.text)+'</span>';
+      pos = tok.end;
+    });
+    html += escapeHtml(chunkText.slice(pos)).replace(/\n/g, "<br>");
+  });
+  document.getElementById("roomText").innerHTML = html;
+}
+
+function clearHighlight(){
+  document.querySelectorAll(".hl-unit.active").forEach(el=>el.classList.remove("active"));
+  activeTokenIdx = -1;
+}
+
+// Startet das fließende Mitlesen für einen Chunk: rechnet, wie groß (in
+// Sekunden) der Anteil jeder Worteinheit an der geschätzten Chunk-Dauer ist,
+// proportional zur Zeichenlänge -- längere Wörter bekommen mehr Zeit.
+function setupHighlightForChunk(idx, localTotalSeconds){
+  clearHighlight();
+  highlightTokens = Array.from(document.querySelectorAll('[data-chunk="'+idx+'"]'));
+  const meta = chunkTokenMeta[idx] || [];
+  const totalLen = (meta.length ? meta[meta.length-1].end : 1) || 1;
+  highlightCumStart = meta.map(t=>t.start/totalLen);
+  highlightCumEnd = meta.map(t=>t.end/totalLen);
+  highlightLocalTotalMs = Math.max(300, localTotalSeconds*1000);
+  highlightStartTime = performance.now();
+  if(highlightRAF) cancelAnimationFrame(highlightRAF);
+  if(highlightTokens.length) tickHighlight();
+}
+
+function setActiveToken(k){
+  if(k === activeTokenIdx) return;
+  if(activeTokenIdx>=0 && highlightTokens[activeTokenIdx]) highlightTokens[activeTokenIdx].classList.remove("active");
+  activeTokenIdx = k;
+  if(highlightTokens[k]){
+    highlightTokens[k].classList.add("active");
+    highlightTokens[k].scrollIntoView({behavior:"smooth", block:"nearest"});
+  }
+}
+
+// Zeitbasierte Annäherung: bewegt die Hervorhebung gleichmäßig weiter, auch
+// wenn der Browser keine echten Wort-Events liefert (z.B. häufig bei Safari).
+function tickHighlight(){
+  if(!highlightTokens.length) return;
+  const elapsed = performance.now() - highlightStartTime;
+  const frac = Math.min(1, elapsed / highlightLocalTotalMs);
+  let k = highlightTokens.length-1;
+  for(let i=0;i<highlightCumEnd.length;i++){
+    if(frac < highlightCumEnd[i]){ k=i; break; }
+  }
+  setActiveToken(k);
+  if(frac < 1){
+    highlightRAF = requestAnimationFrame(tickHighlight);
+  }
+}
+
+// Wird aufgerufen, wenn der Browser ein echtes Wort-Grenze-Event liefert.
+// Korrigiert die Hervorhebung sofort und gleicht die Zeitbasis ab, damit die
+// folgenden, rein zeitbasierten Schritte ab hier wieder genau im Takt sind.
+function correctHighlightFromBoundary(idx, charIndex){
+  const meta = chunkTokenMeta[idx] || [];
+  if(!meta.length) return;
+  const totalLen = meta[meta.length-1].end || 1;
+  let k = meta.length-1;
+  for(let i=0;i<meta.length;i++){
+    if(charIndex < meta[i].end){ k=i; break; }
+  }
+  const frac = meta[k].start/totalLen;
+  highlightStartTime = performance.now() - frac*highlightLocalTotalMs;
+  setActiveToken(k);
+}
+
+function ensureReady(){
+  if(!chunks.length){ prepareChunks(); buildHighlightMarkup(); }
+}
+
 function startKeepAlive(){
+
   clearInterval(keepAliveTimer);
   // Zweite, unabhängige Absicherung gegen denselben Bug-Typ: alle 10s kurz
   // pausieren/fortsetzen, falls ein Browser noch eine andere Variante hat.
@@ -302,6 +423,7 @@ function speakChunk(idx){
   u.onstart = ()=>{
     document.getElementById("speakBadge").classList.add("on");
     document.getElementById("speakLbl").textContent = "Speaking in "+langNames[lang]+"...";
+    setupHighlightForChunk(idx, localTotal);
     clearInterval(ticker);
     let localElapsed = 0;
     ticker = setInterval(()=>{
@@ -314,12 +436,21 @@ function speakChunk(idx){
       // Beendet wird ausschließlich durch das echte onend der Utterance.
     },1000);
   };
+  // Manche Browser (v.a. Chrome/Edge) melden hier echte Wort-Grenzen --
+  // wo verfügbar, korrigiert das die fließende Hervorhebung exakt. Browser
+  // ohne dieses Event (z.B. häufig Safari) laufen einfach mit der
+  // zeitbasierten Schätzung aus setupHighlightForChunk weiter.
+  u.onboundary = (e)=>{
+    if(typeof e.charIndex === "number") correctHighlightFromBoundary(idx, e.charIndex);
+  };
   u.onend = ()=>{
     clearInterval(ticker);
+    if(highlightRAF){ cancelAnimationFrame(highlightRAF); highlightRAF=null; }
     if(playing) speakChunk(idx+1);
   };
   u.onerror = ()=>{
     clearInterval(ticker);
+    if(highlightRAF){ cancelAnimationFrame(highlightRAF); highlightRAF=null; }
     if(playing) speakChunk(idx+1);
   };
   window.speechSynthesis.speak(u);
@@ -328,7 +459,7 @@ function speakChunk(idx){
 function speak(fromProgress){
   if(!window.speechSynthesis) return false;
   window.speechSynthesis.cancel();
-  prepareChunks();
+  ensureReady();
   const total = totalDuration();
   const targetElapsed = Math.round(((fromProgress!=null?fromProgress:prog)/100)*total);
   let acc=0, idx=0, found=false;
@@ -346,6 +477,8 @@ function stopAll(){
   playing=false;
   clearInterval(ticker);
   clearInterval(keepAliveTimer);
+  if(highlightRAF){ cancelAnimationFrame(highlightRAF); highlightRAF=null; }
+  clearHighlight();
   if(window.speechSynthesis) window.speechSynthesis.cancel();
   const pb = document.getElementById("playBtn");
   if(pb) pb.innerHTML = "&#9654;";
@@ -356,12 +489,14 @@ function stopAll(){
 function togglePlay(){
   if(playing){stopAll();return;}
   playing=true;
+  // Text automatisch aufklappen, damit man der Hervorhebung folgen kann.
+  if(!textOpen) toggleText();
   document.getElementById("playBtn").innerHTML = "&#9646;&#9646;";
   if(!speak()){playing=false;document.getElementById("playBtn").innerHTML="&#9654;";}
 }
 
 function skip(s){
-  if(!chunks.length) prepareChunks();
+  ensureReady();
   const total = totalDuration();
   const cs = Math.round((prog/100)*total);
   const ns = Math.max(0,Math.min(total,cs+s));
@@ -398,6 +533,7 @@ function render(){
   const r = rooms[cur];
   const name = r.names[lang]||r.names.en;
   prepareChunks();
+  buildHighlightMarkup();
   const total = totalDuration();
   document.getElementById("roomBadge").textContent = "Room "+r.id;
   document.getElementById("heroImg").style.display="none";
@@ -407,7 +543,6 @@ function render(){
   document.getElementById("roomName").textContent = name;
   document.getElementById("roomSub").textContent = r.subs[lang]||r.subs.en;
   document.getElementById("tipText").textContent = r.tips[lang]||r.tips.en;
-  document.getElementById("roomText").textContent = r.texts[lang]||r.texts.en;
   document.getElementById("roomText").classList.toggle("open",textOpen);
   document.getElementById("readMoreBtn").innerHTML = textOpen?"Show less &#9650;":"Read more &#9660;";
   document.getElementById("pName").textContent = name;
@@ -426,7 +561,7 @@ function render(){
 }
 
 document.getElementById("progBg").addEventListener("click", function(e){
-  if(!chunks.length) prepareChunks();
+  ensureReady();
   const total = totalDuration();
   const rect = this.getBoundingClientRect();
   const ratio = Math.min(1, Math.max(0, (e.clientX-rect.left)/rect.width));
@@ -439,6 +574,7 @@ document.getElementById("progBg").addEventListener("click", function(e){
     speak(prog);
   }
 });
+
 
 document.getElementById("mainBody").addEventListener("touchstart",e=>{
   touchStartX=e.touches[0].clientX; touchStartY=e.touches[0].clientY;
