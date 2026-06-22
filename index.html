@@ -241,10 +241,22 @@ function fmt(s){const m=Math.floor(s/60),sec=Math.floor(s%60);return m+":"+(sec<
 
 // Zeichen-basierte Dauer-Schätzung statt Wort-Zählung (alte Methode hat für
 // ja/zh, die keine Leerzeichen zwischen Wörtern haben, ~0 Sekunden geliefert).
+//
+// WICHTIG: Ein einzelnes chinesisches/japanisches Schriftzeichen trägt oft
+// so viel Bedeutung wie ein ganzes englisches Wort und dauert beim Sprechen
+// entsprechend länger pro Zeichen. Mit EINER festen Rate für alle Sprachen
+// wurde die geschätzte Dauer für ja/zh massiv unterschätzt -- die Anzeige
+// wirkte "halb so lang", obwohl die echte Sprachausgabe ungefähr genauso
+// lange dauert wie bei den anderen Sprachen für den gleichen Inhalt. Das
+// betrifft nicht nur die Anzeige, sondern auch die 15s-Sicherheitsgrenze
+// beim Chunking -- mit der alten, zu optimistischen Schätzung wären ja/zh-
+// Happen in Wirklichkeit näher an der echten Abbruchgrenze gelaufen, als es
+// die Schätzung vermuten ließ.
 function estimateSeconds(text){
   if(!text) return 1;
   const len = text.replace(/\s+/g," ").trim().length;
-  return Math.max(1, Math.round(len/14));
+  const charsPerSecond = lang === "zh" ? 4.5 : (lang === "ja" ? 6.2 : 14);
+  return Math.max(1, Math.round(len/charsPerSecond));
 }
 function dur(r){
   const text = (r.texts && r.texts[lang]) ? r.texts[lang] : r.texts.en;
@@ -255,12 +267,25 @@ function dur(r){
 // auf Chrome/Android (und manchen Safari/iOS-Versionen) nach ca. 15 Sekunden
 // kommentarlos ab. Das war der Grund, warum genau Rittersaal und Hauptportal
 // (Hof) abgeschnitten wurden -- das sind die beiden mit Abstand längsten
-// Texte. Lösung: Text in kleine, satzweise Häppchen zerlegen und per onend
-// nacheinander abspielen ("chaining"). Kein einzelner Happen kommt dadurch
-// in die Nähe von 15 Sekunden.
+// Texte. Lösung: Text in kleine Häppchen zerlegen und hintereinander
+// abspielen ("chaining"). Kein einzelner Happen kommt dadurch in die Nähe
+// von 15 Sekunden.
+//
+// Damit es dabei nicht an jedem einzelnen Satzende kurz stockt, wird in
+// zwei Schritten vorgegangen:
+// 1) Text in möglichst kleine "Atome" zerlegen, von denen jedes für sich
+//    schon sicher unter der Grenze bleibt (an Satzenden, bei einzelnen sehr
+//    langen Sätzen zusätzlich an Kommas, im Notfall hart nach Zeichenzahl).
+// 2) Diese Atome wieder greedy zu möglichst GROSSEN Happen zusammenfassen,
+//    bis knapp unter die Grenze -- das verschmilzt sowohl mehrere kurze
+//    Sätze untereinander als auch die Kommastücke EINES langen Satzes
+//    wieder zu einem zusammenhängenden, natürlicheren Happen. Weniger
+//    Übergänge zwischen einzelnen Sprachausgabe-Aufrufen = weniger hörbare
+//    Pausen "an jedem Punkt".
 function splitIntoChunks(text){
   const enders = ".!?。！？";
   const softBreaks = ",;:，；：、";
+  const SAFE_SECONDS = 11; // deutlich unter der 15s-Grenze
   function splitBy(str, breakChars){
     const out = [];
     let buf = "";
@@ -279,18 +304,33 @@ function splitIntoChunks(text){
     if(rest.length>0) out.push(rest);
     return out.length ? out : [str];
   }
+
+  // Schritt 1: kleine, sicher unbedenkliche Atome erzeugen.
   const sentences = splitBy(text, enders);
-  const SAFE_SECONDS = 11; // deutlich unter der 15s-Grenze
-  const final = [];
+  const atoms = [];
   sentences.forEach(s=>{
-    if(estimateSeconds(s) <= SAFE_SECONDS){ final.push(s); return; }
+    if(estimateSeconds(s) <= SAFE_SECONDS){ atoms.push(s); return; }
     const subParts = splitBy(s, softBreaks);
     subParts.forEach(p=>{
-      if(estimateSeconds(p) <= SAFE_SECONDS){ final.push(p); return; }
+      if(estimateSeconds(p) <= SAFE_SECONDS){ atoms.push(p); return; }
       const maxLen = SAFE_SECONDS*14;
-      for(let i=0;i<p.length;i+=maxLen){ final.push(p.slice(i,i+maxLen)); }
+      for(let i=0;i<p.length;i+=maxLen){ atoms.push(p.slice(i,i+maxLen)); }
     });
   });
+
+  // Schritt 2: Atome greedy wieder zu möglichst großen Happen zusammenfassen.
+  const final = [];
+  let buf = "";
+  atoms.forEach(a=>{
+    const candidate = buf + a;
+    if(buf === "" || estimateSeconds(candidate) <= SAFE_SECONDS){
+      buf = candidate;
+    } else {
+      final.push(buf);
+      buf = a;
+    }
+  });
+  if(buf) final.push(buf);
   return final.length ? final : [text];
 }
 
@@ -434,10 +474,17 @@ function startKeepAlive(){
   },10000);
 }
 
-function speakChunk(idx){
-  if(!window.speechSynthesis) return;
-  if(idx>=chunks.length){ prog=100; stopAll(); return; }
-  chunkIdx = idx;
+// Baut eine einzelne Utterance für einen Happen, OHNE selbst die nächste
+// Utterance anzustoßen -- das Verketten passiert jetzt nicht mehr per
+// onend, sondern indem alle Happen sofort im Voraus in die Warteschlange
+// der Sprachausgabe eingereiht werden (siehe speak() unten). Grund: Wartet
+// man bis onend feuert und ruft DANACH erst speak() für den nächsten Happen
+// auf, entsteht bei jedem Übergang -- also an praktisch jedem Satzende --
+// eine spürbare Verzögerung (Hin- und Her durch den JS-Event-Loop plus
+// Anlaufzeit der neuen Utterance im Browser). Reicht man alle Happen sofort
+// hintereinander ein, kann der Browser sie nahtloser aneinanderhängen.
+let queuedUtterances = [];
+function buildUtteranceForChunk(idx){
   const chunkStartElapsed = chunkDurs.slice(0,idx).reduce((a,b)=>a+b,0);
   const total = totalDuration();
   const localTotal = chunkDurs[idx] || 1;
@@ -452,6 +499,7 @@ function speakChunk(idx){
   if(match) u.voice = match;
 
   u.onstart = ()=>{
+    chunkIdx = idx;
     document.getElementById("speakBadge").classList.add("on");
     document.getElementById("speakLbl").textContent = "Speaking in "+langNames[lang]+"...";
     setupHighlightForChunk(idx, localTotal);
@@ -477,14 +525,13 @@ function speakChunk(idx){
   u.onend = ()=>{
     clearInterval(ticker);
     if(highlightRAF){ cancelAnimationFrame(highlightRAF); highlightRAF=null; }
-    if(playing) speakChunk(idx+1);
+    if(idx === chunks.length-1){ prog=100; stopAll(); }
   };
   u.onerror = ()=>{
     clearInterval(ticker);
     if(highlightRAF){ cancelAnimationFrame(highlightRAF); highlightRAF=null; }
-    if(playing) speakChunk(idx+1);
   };
-  window.speechSynthesis.speak(u);
+  return u;
 }
 
 function speak(fromProgress){
@@ -493,13 +540,25 @@ function speak(fromProgress){
   ensureReady();
   const total = totalDuration();
   const targetElapsed = Math.round(((fromProgress!=null?fromProgress:prog)/100)*total);
-  let acc=0, idx=0, found=false;
+  let acc=0, startIdx=0, found=false;
   for(let i=0;i<chunkDurs.length;i++){
-    if(acc+chunkDurs[i] > targetElapsed){ idx=i; found=true; break; }
+    if(acc+chunkDurs[i] > targetElapsed){ startIdx=i; found=true; break; }
     acc += chunkDurs[i];
   }
-  if(!found) idx = Math.max(0, chunks.length-1);
-  speakChunk(idx);
+  if(!found) startIdx = Math.max(0, chunks.length-1);
+  // Referenzen bewusst in einem Array halten: manche Browser können eine
+  // Utterance vorzeitig "vergessen" (Garbage Collection), wenn nirgendwo
+  // mehr eine Referenz darauf existiert, wodurch z.B. onend nie feuert.
+  queuedUtterances = [];
+  for(let i=startIdx;i<chunks.length;i++){
+    const u = buildUtteranceForChunk(i);
+    queuedUtterances.push(u);
+    window.speechSynthesis.speak(u);
+  }
+  // Nach einem cancel() bleibt die Sprachausgabe in manchen Chrome-Versionen
+  // in einem "pausierten" Zustand zurück, wodurch die frisch eingereihte
+  // Warteschlange gar nicht von selbst losläuft -- resume() behebt das.
+  window.speechSynthesis.resume();
   startKeepAlive();
   return true;
 }
@@ -511,6 +570,7 @@ function stopAll(){
   if(highlightRAF){ cancelAnimationFrame(highlightRAF); highlightRAF=null; }
   clearHighlight();
   if(window.speechSynthesis) window.speechSynthesis.cancel();
+  queuedUtterances = [];
   const pb = document.getElementById("playBtn");
   if(pb) pb.innerHTML = "&#9654;";
   const sb = document.getElementById("speakBadge");
@@ -535,7 +595,6 @@ function skip(s){
   document.getElementById("progFill").style.width = prog+"%";
   document.getElementById("elapsed").textContent = fmt(ns);
   if(playing){
-    window.speechSynthesis.cancel();
     speak(prog);
   }
 }
@@ -597,7 +656,6 @@ document.getElementById("progBg").addEventListener("click", function(e){
   document.getElementById("progFill").style.width = prog+"%";
   document.getElementById("elapsed").textContent = fmt(ns);
   if(playing){
-    window.speechSynthesis.cancel();
     speak(prog);
   }
 });
