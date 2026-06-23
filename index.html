@@ -45,7 +45,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Georgia,serif;backg
 .room-body{padding:14px}
 .room-sub{font-size:12px;color:#8B6F47;margin-bottom:10px;font-style:italic}
 .room-text{font-size:14px;color:#3D2010;line-height:1.8;max-height:84px;overflow:hidden;transition:max-height .3s}
-.room-text.open{max-height:800px}
+.room-text.open{max-height:6000px}
 .hl-unit{border-radius:3px;padding:0 1px;transition:background-color .22s ease,color .15s ease}
 .hl-unit.active{background:#A0522D;color:#FDFAF5}
 .read-more{background:transparent;border:none;color:#A0522D;font-size:12px;cursor:pointer;margin-top:6px;padding:0;min-height:34px;display:block;font-family:-apple-system,sans-serif}
@@ -599,9 +599,25 @@ function skip(s){
   }
 }
 
+// BUGFIX: ".room-text.open" hatte vorher eine fest codierte Pixel-Grenze.
+// Seit Absatzumbrüche im Text als echte <br>-Zeilenumbrüche dargestellt
+// werden (lesbarer!), reichte diese feste Grenze bei den meisten Räumen
+// nicht mehr aus -- der Text wirkte mitten im Satz abgeschnitten, ohne
+// Möglichkeit, weiter aufzuklappen. Lösung: die nötige Höhe wird jetzt aus
+// der tatsächlichen Inhaltsgröße (scrollHeight) gemessen, nie mehr geraten.
+function applyTextOpenState(){
+  const el = document.getElementById("roomText");
+  if(textOpen){
+    el.style.maxHeight = el.scrollHeight + "px";
+  } else {
+    el.style.maxHeight = "84px";
+  }
+  el.classList.toggle("open", textOpen);
+}
+
 function toggleText(){
   textOpen = !textOpen;
-  document.getElementById("roomText").classList.toggle("open",textOpen);
+  applyTextOpenState();
   document.getElementById("readMoreBtn").innerHTML = textOpen?"Show less &#9650;":"Read more &#9660;";
 }
 
@@ -629,7 +645,7 @@ function render(){
   document.getElementById("roomTitleName").textContent = name;
   document.getElementById("roomSub").textContent = r.subs[lang]||r.subs.en;
   document.getElementById("tipText").textContent = r.tips[lang]||r.tips.en;
-  document.getElementById("roomText").classList.toggle("open",textOpen);
+  applyTextOpenState();
   document.getElementById("readMoreBtn").innerHTML = textOpen?"Show less &#9650;":"Read more &#9660;";
   document.getElementById("pName").textContent = name;
   document.getElementById("pLang").textContent = langNames[lang]||lang;
