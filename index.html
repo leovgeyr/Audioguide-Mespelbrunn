@@ -12,85 +12,84 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5EDD9;color:#2C1810;display:flex;flex-direction:column;height:100vh;height:100dvh}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5EDD9;display:flex;align-items:flex-start;justify-content:center;height:100vh;height:100dvh}
 
-/* HEADER */
-.hdr{background:#E8D9BA;padding:env(safe-area-inset-top,0px) 0 0;flex-shrink:0;border-bottom:2px solid #C4A882}
-.hdr-top{display:flex;align-items:center;justify-content:center;padding:12px 16px 10px}
-.castle-lbl{font-size:12px;font-weight:700;color:#6B3A1F;letter-spacing:2.5px;text-transform:uppercase;font-family:Georgia,serif}
+/* APP CONTAINER — zentriert, phone-Breite */
+.app{width:100%;max-width:430px;height:100%;background:#F5EDD9;display:flex;flex-direction:column;overflow:hidden}
 
-/* ALLE BUTTONS — einheitlich rötlicher Sandstein */
-button{font-family:-apple-system,sans-serif}
-.lb,.rg,.cbtn,.nbtn,.play-btn,.show-text-btn,.pin-btn{
-  background:#A0522D;color:#FDFAF5;border:none;cursor:pointer;
-  transition:background .15s,transform .1s;
-}
-.lb:active,.rg:active,.cbtn:active,.nbtn:active,.show-text-btn:active{background:#6B3A1F}
-.play-btn:active{background:#6B3A1F;transform:scale(0.93)}
-.pin-btn:active{background:#6B3A1F;transform:scale(0.95)}
-.lb,.rg,.cbtn,.nbtn{border-radius:6px}
-
-/* LANGUAGE BUTTONS */
-.lang-row{display:flex;gap:6px;padding:0 14px 12px;flex-wrap:wrap}
-.lb{padding:7px 14px;font-size:12px;font-weight:700;letter-spacing:.5px;min-height:36px}
+/* TOP BAR */
+.top-bar{flex-shrink:0;background:#EDE0C4;padding:env(safe-area-inset-top,0px) 0 0;border-bottom:1px solid #D4B896}
+.castle-title{text-align:center;padding:12px 16px 8px;font-size:11px;font-weight:700;color:#6B3A1F;letter-spacing:2.5px;text-transform:uppercase;font-family:Georgia,serif}
+.lang-row{display:flex;gap:6px;padding:0 14px 12px;flex-wrap:wrap;justify-content:center}
+.lb{padding:7px 14px;border-radius:20px;border:none;background:#A0522D;color:#FDFAF5;font-size:12px;font-weight:700;cursor:pointer;transition:background .15s;min-height:36px;letter-spacing:.5px}
 .lb.on{background:#6B3A1F}
+.lb:active{background:#6B3A1F}
 
-/* PLAYER BAR */
-.player-bar{padding:10px 14px 8px;border-top:1px solid #D4B896}
-.player-meta{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
-.p-name{font-size:13px;font-weight:700;color:#2C1810;font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72%}
-.p-lang{font-size:11px;color:#8B6F47}
+/* SCROLLABLE CONTENT */
+.content{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:env(safe-area-inset-bottom,16px)}
+
+/* COVER ART — wie Albumcover */
+.cover-art{width:100%;aspect-ratio:1;max-height:42vh;background:linear-gradient(150deg,#D4B896 0%,#C4A882 55%,#A8825C 100%);position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+.cover-room-name{font-family:Georgia,serif;font-size:30px;font-weight:700;color:#2C1810;text-align:center;padding:24px;line-height:1.3;opacity:.55}
+.room-badge{position:absolute;top:14px;left:14px;background:rgba(44,24,16,.75);color:#F5EDD9;font-size:11px;font-weight:700;padding:5px 13px;border-radius:20px;letter-spacing:1px}
+
+/* ROOM INFO */
+.room-info{padding:18px 22px 0}
+.room-name-lg{font-family:Georgia,serif;font-size:22px;font-weight:700;color:#2C1810;margin-bottom:3px}
+.room-sub-line{font-size:13px;color:#8B6F47;font-style:italic}
 
 /* PROGRESS */
-.prog-wrap{margin-bottom:10px}
-.prog-bg{height:4px;background:#D4B896;border-radius:3px;cursor:pointer;position:relative;margin-bottom:6px}
+.prog-section{padding:18px 22px 0}
+.prog-bg{height:4px;background:#D4B896;border-radius:3px;cursor:pointer;position:relative;margin-bottom:8px}
 .prog-fill{height:4px;background:#A0522D;border-radius:3px;width:0%;position:relative}
-.prog-dot{width:13px;height:13px;background:#6B3A1F;border-radius:50%;position:absolute;right:-6.5px;top:-4.5px;box-shadow:0 0 0 3px rgba(160,82,45,0.2)}
-.time-row{display:flex;justify-content:space-between;font-size:11px;color:#8B6F47}
+.prog-dot{width:13px;height:13px;background:#2C1810;border-radius:50%;position:absolute;right:-6.5px;top:-4.5px;box-shadow:0 0 0 3px rgba(160,82,45,0.2)}
+.time-row{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:#8B6F47}
+.p-lang-lbl{font-size:11px;color:#A0522D;font-weight:600}
 
-/* CONTROLS */
-.controls{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
-.cbtn{font-size:17px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:8px}
-.play-btn{width:54px;height:54px;background:#A0522D;border-radius:50%;font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 10px rgba(160,82,45,0.3)}
-.nbtn{flex:1;font-size:12px;font-weight:700;height:44px;letter-spacing:.3px;white-space:nowrap;padding:0 8px;border-radius:8px}
-.nbtn:disabled{opacity:.3;cursor:default}
+/* MAIN CONTROLS — Spotify-Stil */
+.controls-main{display:flex;align-items:center;justify-content:center;gap:32px;padding:22px 22px 0}
+.skip-btn{background:#A0522D;border:none;cursor:pointer;width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.skip-btn:active{background:#6B3A1F;transform:scale(0.88)}
+.play-btn{width:68px;height:68px;background:#A0522D;border-radius:50%;border:none;cursor:pointer;color:#FDFAF5;font-size:28px;display:flex;align-items:center;justify-content:center;padding-left:3px;transition:all .15s;box-shadow:0 4px 16px rgba(160,82,45,0.35);flex-shrink:0}
+.play-btn:active{transform:scale(0.92);background:#6B3A1F}
 
-/* SPEAKING BADGE */
-.speak-badge{display:none;align-items:center;gap:6px;font-size:11px;color:#8B6F47;padding-bottom:2px}
+/* SPEAK BADGE */
+.speak-badge{display:none;align-items:center;gap:6px;font-size:11px;color:#8B6F47;padding:8px 22px 0;justify-content:center}
 .speak-badge.on{display:flex}
 .dot1,.dot2,.dot3{width:4px;height:4px;background:#A0522D;border-radius:50%;animation:bop 1.2s infinite}
 .dot2{animation-delay:.2s}.dot3{animation-delay:.4s}
 @keyframes bop{0%,100%{transform:scaleY(1)}50%{transform:scaleY(2)}}
 
+/* ROOM NAV — Prev / Next */
+.room-nav{display:flex;gap:10px;padding:16px 22px 0}
+.nbtn{flex:1;padding:13px;border-radius:8px;border:none;background:#A0522D;color:#FDFAF5;font-size:13px;font-weight:700;cursor:pointer;min-height:48px;transition:background .15s;letter-spacing:.3px;white-space:nowrap;font-family:-apple-system,sans-serif}
+.nbtn:active{background:#6B3A1F}
+.nbtn:disabled{opacity:.28;cursor:default}
+
 /* ROOM GRID */
-.room-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:6px 14px 12px}
-.rg{padding:7px 4px;min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1.25;border-radius:8px;text-align:center}
+.room-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:14px 22px 0}
+.rg{padding:8px 4px;border-radius:8px;border:none;background:#A0522D;color:#FDFAF5;font-size:10px;cursor:pointer;text-align:center;transition:background .15s;min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1.25;font-family:-apple-system,sans-serif}
 .rg.on{background:#6B3A1F}
-.rg-num{font-weight:700;font-size:9px;opacity:.7;letter-spacing:.5px}
+.rg:active{background:#6B3A1F}
+.rg-num{font-weight:700;font-size:8px;opacity:.65;letter-spacing:.5px}
 .rg-label{font-weight:600;font-size:10px}
 
-/* BODY */
-.body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 15px 32px;background:#F5EDD9}
-
 /* TIP */
-.tip{background:#EDE0C4;border-radius:8px;padding:11px 13px;font-size:12px;color:#6B3A1F;display:flex;gap:9px;margin-bottom:16px;border-left:3px solid #A0522D;align-items:flex-start;font-style:italic}
+.tip{background:#EDE0C4;border-radius:8px;padding:11px 13px;font-size:12px;color:#6B3A1F;display:flex;gap:9px;margin:16px 22px 0;border-left:3px solid #A0522D;align-items:flex-start;font-style:italic}
 
-/* ROOM HERO */
-.room-hero{background:#FAF4E8;border-radius:10px;border:1.5px solid #D4B896;margin-bottom:14px;overflow:hidden;box-shadow:0 2px 8px rgba(44,24,16,0.07)}
-.room-title-card{min-height:130px;background:linear-gradient(150deg,#EDE0C4,#D4B896);display:flex;align-items:center;justify-content:center;position:relative;padding:34px 20px}
-.room-badge{position:absolute;top:11px;left:13px;background:#A0522D;border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;color:#FDFAF5;letter-spacing:1px}
-.room-title-name{font-family:Georgia,serif;font-size:24px;font-weight:700;color:#2C1810;text-align:center;line-height:1.3}
-.room-body{padding:14px 15px}
-.room-sub{font-size:12px;color:#8B6F47;margin-bottom:12px;font-style:italic}
+/* SHOW TEXT BUTTON */
+.show-text-btn{display:block;width:calc(100% - 44px);margin:14px 22px 0;padding:13px;border-radius:8px;border:none;background:#A0522D;color:#FDFAF5;font-size:13px;font-weight:700;letter-spacing:.3px;text-align:center;cursor:pointer;transition:background .15s;font-family:-apple-system,sans-serif}
+.show-text-btn:active{background:#6B3A1F}
 
-/* TEXT — standardmäßig ausgeblendet */
-.room-text{font-size:14px;color:#2C1810;line-height:1.85;max-height:0;overflow:hidden;transition:max-height .35s ease}
-.room-text.open{max-height:6000px}
+/* ROOM TEXT (Lyrics-Stil) */
+.room-text-wrap{margin:0 22px;padding:0;max-height:0;overflow:hidden;transition:max-height .35s ease}
+.room-text-wrap.open{max-height:6000px;margin-top:14px}
+.room-text{font-size:15px;color:#2C1810;line-height:1.9;background:#EDE0C4;border-radius:10px;padding:18px}
 .hl-unit{border-radius:2px;padding:0 1px;transition:background-color .2s ease,color .12s ease}
 .hl-unit.active{background:#A0522D;color:#FDFAF5}
 
-/* SHOW TEXT BUTTON */
-.show-text-btn{display:block;width:100%;padding:10px;border-radius:8px;font-size:13px;font-weight:700;letter-spacing:.3px;margin-top:4px;text-align:center}
+/* BOTTOM SPACE */
+.bottom-pad{height:24px}
 
 /* PIN SCREEN */
 #pinScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:#F5EDD9;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
@@ -101,7 +100,8 @@ button{font-family:-apple-system,sans-serif}
 .pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid #C4A882;background:transparent;transition:all .2s}
 .pin-dot.filled{background:#A0522D;border-color:#A0522D}
 .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;width:264px}
-.pin-btn{height:70px;border-radius:10px;font-size:24px;font-weight:400;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif}
+.pin-btn{height:70px;border-radius:10px;border:none;background:#A0522D;color:#FDFAF5;font-size:24px;font-weight:400;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif}
+.pin-btn:active{background:#6B3A1F;transform:scale(0.95)}
 .pin-btn.del{font-size:18px;background:#C4A882;color:#2C1810}
 .pin-btn.del:active{background:#A0522D;color:#FDFAF5}
 .pin-btn.empty{background:transparent;cursor:default}
@@ -114,25 +114,12 @@ button{font-family:-apple-system,sans-serif}
 
 <div id="pinScreen">
   <svg class="pin-crest" viewBox="0 0 120 140" width="108" height="126" xmlns="http://www.w3.org/2000/svg">
-    <defs>
-      <linearGradient id="crestGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#EDE0C4"/>
-        <stop offset="100%" stop-color="#C4A882"/>
-      </linearGradient>
-    </defs>
-    <path d="M60 6 C75 7 90 10 100 14 L106 17 L106 68 C106 85 104 96 96 103 C84 116 70 126 60 132 C50 126 36 116 24 103 C16 96 14 85 14 68 L14 17 L20 14 C30 10 45 7 60 6 Z"
-          fill="url(#crestGrad)" stroke="#A0522D" stroke-width="4" stroke-linejoin="round"/>
+    <defs><linearGradient id="crestGrad" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#EDE0C4"/><stop offset="100%" stop-color="#C4A882"/></linearGradient></defs>
+    <path d="M60 6 C75 7 90 10 100 14 L106 17 L106 68 C106 85 104 96 96 103 C84 116 70 126 60 132 C50 126 36 116 24 103 C16 96 14 85 14 68 L14 17 L20 14 C30 10 45 7 60 6 Z" fill="url(#crestGrad)" stroke="#A0522D" stroke-width="4" stroke-linejoin="round"/>
     <g fill="#A0522D">
-      <rect x="38" y="52" width="44" height="52"/>
-      <rect x="30" y="38" width="14" height="22"/>
-      <rect x="76" y="38" width="14" height="22"/>
-      <rect x="52" y="28" width="16" height="28"/>
-      <rect x="28" y="34" width="5" height="7"/>
-      <rect x="40" y="34" width="5" height="7"/>
-      <rect x="74" y="34" width="5" height="7"/>
-      <rect x="86" y="34" width="5" height="7"/>
-      <rect x="53" y="22" width="5" height="7"/>
-      <rect x="63" y="22" width="5" height="7"/>
+      <rect x="38" y="52" width="44" height="52"/><rect x="30" y="38" width="14" height="22"/><rect x="76" y="38" width="14" height="22"/>
+      <rect x="52" y="28" width="16" height="28"/><rect x="28" y="34" width="5" height="7"/><rect x="40" y="34" width="5" height="7"/>
+      <rect x="74" y="34" width="5" height="7"/><rect x="86" y="34" width="5" height="7"/><rect x="53" y="22" width="5" height="7"/><rect x="63" y="22" width="5" height="7"/>
     </g>
     <rect x="53" y="76" width="14" height="24" fill="#EDE0C4"/>
     <rect x="45" y="62" width="4" height="9" fill="#EDE0C4"/>
@@ -142,10 +129,8 @@ button{font-family:-apple-system,sans-serif}
   <div class="pin-title">Schloss Mespelbrunn</div>
   <div class="pin-sub">Audio Guide &mdash; Enter access code</div>
   <div class="pin-dots">
-    <div class="pin-dot" id="d0"></div>
-    <div class="pin-dot" id="d1"></div>
-    <div class="pin-dot" id="d2"></div>
-    <div class="pin-dot" id="d3"></div>
+    <div class="pin-dot" id="d0"></div><div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div><div class="pin-dot" id="d3"></div>
   </div>
   <div class="pin-pad">
     <button class="pin-btn" onclick="pinKey('1')">1</button>
@@ -164,50 +149,74 @@ button{font-family:-apple-system,sans-serif}
   <div class="pin-error" id="pinError">Incorrect code &mdash; please try again</div>
 </div>
 
-<div class="hdr">
-  <div class="hdr-top">
-    <span class="castle-lbl">&#127984; Schloss Mespelbrunn</span>
+<div class="app">
+  <div class="top-bar">
+    <div class="castle-title">&#127984; Schloss Mespelbrunn</div>
+    <div class="lang-row" id="langs"></div>
   </div>
-  <div class="lang-row" id="langs"></div>
-  <div class="player-bar">
-    <div class="player-meta">
-      <div class="p-name" id="pName"></div>
-      <div class="p-lang" id="pLang"></div>
-    </div>
+
+  <div class="content" id="mainBody">
     <audio id="player" preload="auto"></audio>
-    <div class="prog-wrap">
+
+    <div class="cover-art">
+      <div class="room-badge" id="roomBadge">Room 1</div>
+      <div class="cover-room-name" id="roomTitleName"></div>
+    </div>
+
+    <div class="room-info">
+      <div class="room-name-lg" id="pName"></div>
+      <div class="room-sub-line" id="roomSub"></div>
+    </div>
+
+    <div class="prog-section">
       <div class="prog-bg" id="progBg">
         <div class="prog-fill" id="progFill"><div class="prog-dot"></div></div>
       </div>
-      <div class="time-row"><span id="elapsed">0:00</span><span id="totalTime">0:00</span></div>
+      <div class="time-row">
+        <span id="elapsed">0:00</span>
+        <span class="p-lang-lbl" id="pLang"></span>
+        <span id="totalTime">0:00</span>
+      </div>
     </div>
-    <div class="controls">
-      <button class="nbtn" id="prevBtn" onclick="goRoom(cur-1)">&#8592; Prev</button>
-      <button class="cbtn" onclick="skip(-15)">&#9194;</button>
+
+    <div class="controls-main">
+      <button class="skip-btn" onclick="skip(-15)">
+        <svg width="26" height="22" viewBox="0 0 26 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="12,2 2,11 12,20" fill="#FDFAF5"/>
+          <polygon points="24,2 14,11 24,20" fill="#FDFAF5"/>
+          <rect x="0" y="3" width="3" height="16" rx="1.5" fill="#FDFAF5"/>
+        </svg>
+      </button>
       <button class="play-btn" id="playBtn" onclick="togglePlay()">&#9654;</button>
-      <button class="cbtn" onclick="skip(15)">&#9193;</button>
-      <button class="nbtn" id="nextBtn" onclick="goRoom(cur+1)">Next &#8594;</button>
+      <button class="skip-btn" onclick="skip(15)">
+        <svg width="26" height="22" viewBox="0 0 26 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <polygon points="14,2 24,11 14,20" fill="#FDFAF5"/>
+          <polygon points="2,2 12,11 2,20" fill="#FDFAF5"/>
+          <rect x="23" y="3" width="3" height="16" rx="1.5" fill="#FDFAF5"/>
+        </svg>
+      </button>
     </div>
+
     <div class="speak-badge" id="speakBadge">
       <div class="dot1"></div><div class="dot2"></div><div class="dot3"></div>
       <span id="speakLbl">Speaking...</span>
     </div>
-  </div>
-  <div class="room-grid" id="roomGrid"></div>
-</div>
 
-<div class="body" id="mainBody">
-  <div class="tip"><span style="font-size:15px;flex-shrink:0">&#128161;</span><span id="tipText"></span></div>
-  <div class="room-hero">
-    <div class="room-title-card">
-      <div class="room-badge" id="roomBadge">Room 1</div>
-      <div class="room-title-name" id="roomTitleName"></div>
+    <div class="room-nav">
+      <button class="nbtn" id="prevBtn" onclick="goRoom(cur-1)">&#8592; Prev room</button>
+      <button class="nbtn" id="nextBtn" onclick="goRoom(cur+1)">Next room &#8594;</button>
     </div>
-    <div class="room-body">
-      <div class="room-sub" id="roomSub"></div>
+
+    <div class="room-grid" id="roomGrid"></div>
+
+    <div class="tip"><span style="font-size:15px;flex-shrink:0">&#128161;</span><span id="tipText"></span></div>
+
+    <button class="show-text-btn" id="readMoreBtn" onclick="toggleText()">&#128214; Show room text</button>
+    <div class="room-text-wrap" id="roomTextWrap">
       <div class="room-text" id="roomText"></div>
-      <button class="show-text-btn" id="readMoreBtn" onclick="toggleText()">&#128214; Show room text</button>
     </div>
+
+    <div class="bottom-pad"></div>
   </div>
 </div>
 
@@ -371,13 +380,14 @@ function skip(s){
 // nicht mehr aus. Lösung: die nötige Höhe wird aus der tatsächlichen
 // Inhaltsgröße (scrollHeight) gemessen, nie mehr geraten.
 function applyTextOpenState(){
+  const wrap = document.getElementById("roomTextWrap");
   const el = document.getElementById("roomText");
   if(textOpen){
-    el.style.maxHeight = el.scrollHeight + "px";
+    wrap.style.maxHeight = el.scrollHeight + 36 + "px";
   } else {
-    el.style.maxHeight = "0px";
+    wrap.style.maxHeight = "0px";
   }
-  el.classList.toggle("open", textOpen);
+  wrap.classList.toggle("open", textOpen);
   document.getElementById("readMoreBtn").innerHTML = textOpen
     ? "&#128214; Hide room text"
     : "&#128214; Show room text";
