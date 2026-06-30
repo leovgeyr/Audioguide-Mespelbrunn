@@ -12,104 +12,117 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;overflow:hidden}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5EDD9;color:#1C0D05;display:flex;flex-direction:column;height:100vh;height:100dvh}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F5EDD9;color:#2C1810;display:flex;flex-direction:column;height:100vh;height:100dvh}
 
 /* HEADER */
-.hdr{background:#1C0D05;padding:env(safe-area-inset-top,0px) 0 0;flex-shrink:0;border-bottom:2px solid #B8892A}
-.hdr-top{display:flex;align-items:center;justify-content:center;padding:10px 16px 8px}
-.castle-lbl{font-size:12px;font-weight:700;color:#B8892A;letter-spacing:3px;text-transform:uppercase;font-family:Georgia,serif}
+.hdr{background:#E8D9BA;padding:env(safe-area-inset-top,0px) 0 0;flex-shrink:0;border-bottom:2px solid #C4A882}
+.hdr-top{display:flex;align-items:center;justify-content:center;padding:12px 16px 10px}
+.castle-lbl{font-size:12px;font-weight:700;color:#6B3A1F;letter-spacing:2.5px;text-transform:uppercase;font-family:Georgia,serif}
+
+/* ALLE BUTTONS — einheitlich rötlicher Sandstein */
+button{font-family:-apple-system,sans-serif}
+.lb,.rg,.cbtn,.nbtn,.play-btn,.show-text-btn,.pin-btn{
+  background:#A0522D;color:#FDFAF5;border:none;cursor:pointer;
+  transition:background .15s,transform .1s;
+}
+.lb:active,.rg:active,.cbtn:active,.nbtn:active,.show-text-btn:active{background:#6B3A1F}
+.play-btn:active{background:#6B3A1F;transform:scale(0.93)}
+.pin-btn:active{background:#6B3A1F;transform:scale(0.95)}
+.lb,.rg,.cbtn,.nbtn{border-radius:6px}
 
 /* LANGUAGE BUTTONS */
-.lang-row{display:flex;gap:4px;padding:0 12px 8px;flex-wrap:wrap}
-.lb{padding:5px 11px;border-radius:3px;border:1px solid #3D2010;background:#2C1810;color:#9A7A5A;font-size:11px;cursor:pointer;transition:all .15s;min-height:32px;font-weight:600;letter-spacing:.5px}
-.lb.on{background:#B8892A;border-color:#B8892A;color:#1C0D05}
+.lang-row{display:flex;gap:6px;padding:0 14px 12px;flex-wrap:wrap}
+.lb{padding:7px 14px;font-size:12px;font-weight:700;letter-spacing:.5px;min-height:36px}
+.lb.on{background:#6B3A1F}
 
 /* PLAYER BAR */
-.player-bar{padding:8px 13px 6px;border-top:1px solid #2C1810}
-.player-meta{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px}
-.p-name{font-size:13px;font-weight:700;color:#F5EDD9;font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72%}
-.p-lang{font-size:11px;color:#9A7A5A}
+.player-bar{padding:10px 14px 8px;border-top:1px solid #D4B896}
+.player-meta{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px}
+.p-name{font-size:13px;font-weight:700;color:#2C1810;font-family:Georgia,serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:72%}
+.p-lang{font-size:11px;color:#8B6F47}
 
 /* PROGRESS */
-.prog-wrap{margin-bottom:7px}
-.prog-bg{height:3px;background:#3D2010;border-radius:2px;cursor:pointer;position:relative;margin-bottom:5px}
-.prog-fill{height:3px;background:#B8892A;border-radius:2px;width:0%;position:relative}
-.prog-dot{width:11px;height:11px;background:#B8892A;border-radius:50%;position:absolute;right:-5.5px;top:-4px;box-shadow:0 0 0 3px rgba(184,137,42,0.2)}
-.time-row{display:flex;justify-content:space-between;font-size:10px;color:#9A7A5A}
+.prog-wrap{margin-bottom:10px}
+.prog-bg{height:4px;background:#D4B896;border-radius:3px;cursor:pointer;position:relative;margin-bottom:6px}
+.prog-fill{height:4px;background:#A0522D;border-radius:3px;width:0%;position:relative}
+.prog-dot{width:13px;height:13px;background:#6B3A1F;border-radius:50%;position:absolute;right:-6.5px;top:-4.5px;box-shadow:0 0 0 3px rgba(160,82,45,0.2)}
+.time-row{display:flex;justify-content:space-between;font-size:11px;color:#8B6F47}
 
 /* CONTROLS */
-.controls{display:flex;align-items:center;justify-content:space-between;gap:5px;margin-bottom:5px}
-.cbtn{background:#2C1810;border:1px solid #3D2010;cursor:pointer;color:#B8892A;font-size:17px;border-radius:3px;width:38px;height:38px;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
-.cbtn:active{background:#B8892A;color:#1C0D05}
-.play-btn{width:50px;height:50px;background:#B8892A;border-radius:50%;border:none;cursor:pointer;color:#1C0D05;font-size:20px;display:flex;align-items:center;justify-content:center;transition:all .15s;box-shadow:0 2px 8px rgba(184,137,42,0.35);flex-shrink:0}
-.play-btn:active{background:#D4AA50;transform:scale(0.93)}
-.nbtn{flex:1;padding:0 6px;border-radius:3px;border:1px solid #3D2010;background:#2C1810;color:#B8892A;font-size:11px;font-weight:700;cursor:pointer;height:38px;transition:all .15s;letter-spacing:.3px;white-space:nowrap}
-.nbtn:active{background:#3D2010}
-.nbtn:disabled{opacity:.28;cursor:default}
+.controls{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.cbtn{font-size:17px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;flex-shrink:0;border-radius:8px}
+.play-btn{width:54px;height:54px;background:#A0522D;border-radius:50%;font-size:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 10px rgba(160,82,45,0.3)}
+.nbtn{flex:1;font-size:12px;font-weight:700;height:44px;letter-spacing:.3px;white-space:nowrap;padding:0 8px;border-radius:8px}
+.nbtn:disabled{opacity:.3;cursor:default}
 
 /* SPEAKING BADGE */
-.speak-badge{display:none;align-items:center;gap:5px;font-size:11px;color:#9A7A5A;padding-bottom:2px}
+.speak-badge{display:none;align-items:center;gap:6px;font-size:11px;color:#8B6F47;padding-bottom:2px}
 .speak-badge.on{display:flex}
-.dot1,.dot2,.dot3{width:4px;height:4px;background:#B8892A;border-radius:50%;animation:bop 1.2s infinite}
+.dot1,.dot2,.dot3{width:4px;height:4px;background:#A0522D;border-radius:50%;animation:bop 1.2s infinite}
 .dot2{animation-delay:.2s}.dot3{animation-delay:.4s}
 @keyframes bop{0%,100%{transform:scaleY(1)}50%{transform:scaleY(2)}}
 
 /* ROOM GRID */
-.room-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:5px 12px 10px}
-.rg{padding:5px 3px;border-radius:3px;border:1px solid #3D2010;background:#2C1810;color:#9A7A5A;font-size:10px;cursor:pointer;text-align:center;transition:all .15s;min-height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;line-height:1.2}
-.rg.on{background:#B8892A;border-color:#B8892A;color:#1C0D05}
-.rg-num{font-weight:700;font-size:8px;opacity:.65;letter-spacing:.5px}
+.room-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;padding:6px 14px 12px}
+.rg{padding:7px 4px;min-height:50px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;line-height:1.25;border-radius:8px;text-align:center}
+.rg.on{background:#6B3A1F}
+.rg-num{font-weight:700;font-size:9px;opacity:.7;letter-spacing:.5px}
 .rg-label{font-weight:600;font-size:10px}
 
 /* BODY */
-.body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:13px 13px 28px;background:#F5EDD9}
+.body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px 15px 32px;background:#F5EDD9}
 
 /* TIP */
-.tip{background:#EDE0C4;border-radius:5px;padding:9px 12px;font-size:12px;color:#5A3010;display:flex;gap:8px;margin-bottom:12px;border-left:3px solid #B8892A;align-items:flex-start;font-style:italic}
+.tip{background:#EDE0C4;border-radius:8px;padding:11px 13px;font-size:12px;color:#6B3A1F;display:flex;gap:9px;margin-bottom:16px;border-left:3px solid #A0522D;align-items:flex-start;font-style:italic}
 
 /* ROOM HERO */
-.room-hero{background:#FAF4E8;border-radius:7px;border:1px solid #D4B896;margin-bottom:12px;overflow:hidden;box-shadow:0 1px 5px rgba(28,13,5,0.07)}
-.room-title-card{min-height:120px;background:linear-gradient(155deg,#2C1810,#1C0D05);display:flex;align-items:center;justify-content:center;position:relative;padding:30px 18px}
-.room-badge{position:absolute;top:10px;left:12px;background:#B8892A;border-radius:2px;padding:3px 9px;font-size:10px;font-weight:700;color:#1C0D05;letter-spacing:1.5px}
-.room-title-name{font-family:Georgia,serif;font-size:22px;font-weight:700;color:#F5EDD9;text-align:center;line-height:1.3}
-.room-body{padding:13px}
-.room-sub{font-size:12px;color:#8B6F47;margin-bottom:10px;font-style:italic}
-.room-text{font-size:14px;color:#1C0D05;line-height:1.85;max-height:84px;overflow:hidden;transition:max-height .3s}
+.room-hero{background:#FAF4E8;border-radius:10px;border:1.5px solid #D4B896;margin-bottom:14px;overflow:hidden;box-shadow:0 2px 8px rgba(44,24,16,0.07)}
+.room-title-card{min-height:130px;background:linear-gradient(150deg,#EDE0C4,#D4B896);display:flex;align-items:center;justify-content:center;position:relative;padding:34px 20px}
+.room-badge{position:absolute;top:11px;left:13px;background:#A0522D;border-radius:20px;padding:4px 12px;font-size:10px;font-weight:700;color:#FDFAF5;letter-spacing:1px}
+.room-title-name{font-family:Georgia,serif;font-size:24px;font-weight:700;color:#2C1810;text-align:center;line-height:1.3}
+.room-body{padding:14px 15px}
+.room-sub{font-size:12px;color:#8B6F47;margin-bottom:12px;font-style:italic}
+
+/* TEXT — standardmäßig ausgeblendet */
+.room-text{font-size:14px;color:#2C1810;line-height:1.85;max-height:0;overflow:hidden;transition:max-height .35s ease}
 .room-text.open{max-height:6000px}
 .hl-unit{border-radius:2px;padding:0 1px;transition:background-color .2s ease,color .12s ease}
-.hl-unit.active{background:#B8892A;color:#1C0D05}
-.read-more{background:transparent;border:none;color:#6B3A1F;font-size:12px;cursor:pointer;margin-top:8px;padding:0;min-height:34px;display:block;letter-spacing:.3px}
+.hl-unit.active{background:#A0522D;color:#FDFAF5}
+
+/* SHOW TEXT BUTTON */
+.show-text-btn{display:block;width:100%;padding:10px;border-radius:8px;font-size:13px;font-weight:700;letter-spacing:.3px;margin-top:4px;text-align:center}
 
 /* PIN SCREEN */
-#pinScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:#1C0D05;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px}
-.pin-crest{margin-bottom:20px;display:block}
-.pin-title{font-size:12px;font-weight:700;color:#B8892A;letter-spacing:4px;text-transform:uppercase;margin-bottom:6px;font-family:Georgia,serif}
-.pin-sub{font-size:13px;color:#9A7A5A;margin-bottom:38px;text-align:center}
-.pin-dots{display:flex;gap:14px;margin-bottom:30px}
-.pin-dot{width:13px;height:13px;border-radius:50%;border:1.5px solid #3D2010;background:transparent;transition:all .2s}
-.pin-dot.filled{background:#B8892A;border-color:#B8892A}
-.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;width:255px}
-.pin-btn{height:66px;border-radius:4px;border:1px solid #3D2010;background:#2C1810;color:#F5EDD9;font-size:24px;font-weight:400;cursor:pointer;transition:all .15s;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif}
-.pin-btn:active{background:#B8892A;border-color:#B8892A;color:#1C0D05;transform:scale(0.95)}
-.pin-btn.del{font-size:18px;color:#9A7A5A}
-.pin-btn.empty{border:none;background:transparent;cursor:default}
-.pin-error{color:#B8892A;font-size:13px;margin-top:14px;opacity:0;transition:opacity .3s}
+#pinScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:#F5EDD9;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px}
+.pin-crest{margin-bottom:22px;display:block}
+.pin-title{font-size:12px;font-weight:700;color:#6B3A1F;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px;font-family:Georgia,serif}
+.pin-sub{font-size:13px;color:#8B6F47;margin-bottom:40px;text-align:center}
+.pin-dots{display:flex;gap:14px;margin-bottom:32px}
+.pin-dot{width:14px;height:14px;border-radius:50%;border:2px solid #C4A882;background:transparent;transition:all .2s}
+.pin-dot.filled{background:#A0522D;border-color:#A0522D}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;width:264px}
+.pin-btn{height:70px;border-radius:10px;font-size:24px;font-weight:400;display:flex;align-items:center;justify-content:center;font-family:Georgia,serif}
+.pin-btn.del{font-size:18px;background:#C4A882;color:#2C1810}
+.pin-btn.del:active{background:#A0522D;color:#FDFAF5}
+.pin-btn.empty{background:transparent;cursor:default}
+.pin-btn.empty:active{background:transparent;transform:none}
+.pin-error{color:#8B1A00;font-size:13px;margin-top:16px;opacity:0;transition:opacity .3s}
 .pin-error.on{opacity:1}
 </style>
 </head>
 <body>
 
 <div id="pinScreen">
-  <svg class="pin-crest" viewBox="0 0 120 140" width="100" height="116" xmlns="http://www.w3.org/2000/svg">
+  <svg class="pin-crest" viewBox="0 0 120 140" width="108" height="126" xmlns="http://www.w3.org/2000/svg">
     <defs>
       <linearGradient id="crestGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" stop-color="#3D2010"/>
-        <stop offset="100%" stop-color="#2C1810"/>
+        <stop offset="0%" stop-color="#EDE0C4"/>
+        <stop offset="100%" stop-color="#C4A882"/>
       </linearGradient>
     </defs>
     <path d="M60 6 C75 7 90 10 100 14 L106 17 L106 68 C106 85 104 96 96 103 C84 116 70 126 60 132 C50 126 36 116 24 103 C16 96 14 85 14 68 L14 17 L20 14 C30 10 45 7 60 6 Z"
-          fill="url(#crestGrad)" stroke="#B8892A" stroke-width="4" stroke-linejoin="round"/>
-    <g fill="#B8892A">
+          fill="url(#crestGrad)" stroke="#A0522D" stroke-width="4" stroke-linejoin="round"/>
+    <g fill="#A0522D">
       <rect x="38" y="52" width="44" height="52"/>
       <rect x="30" y="38" width="14" height="22"/>
       <rect x="76" y="38" width="14" height="22"/>
@@ -121,10 +134,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <rect x="53" y="22" width="5" height="7"/>
       <rect x="63" y="22" width="5" height="7"/>
     </g>
-    <rect x="53" y="76" width="14" height="24" fill="#2C1810"/>
-    <rect x="45" y="62" width="4" height="9" fill="#2C1810"/>
-    <rect x="71" y="62" width="4" height="9" fill="#2C1810"/>
-    <rect x="58" y="40" width="4" height="9" fill="#2C1810"/>
+    <rect x="53" y="76" width="14" height="24" fill="#EDE0C4"/>
+    <rect x="45" y="62" width="4" height="9" fill="#EDE0C4"/>
+    <rect x="71" y="62" width="4" height="9" fill="#EDE0C4"/>
+    <rect x="58" y="40" width="4" height="9" fill="#EDE0C4"/>
   </svg>
   <div class="pin-title">Schloss Mespelbrunn</div>
   <div class="pin-sub">Audio Guide &mdash; Enter access code</div>
@@ -193,7 +206,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="room-body">
       <div class="room-sub" id="roomSub"></div>
       <div class="room-text" id="roomText"></div>
-      <button class="read-more" id="readMoreBtn" onclick="toggleText()">Read more &#9660;</button>
+      <button class="show-text-btn" id="readMoreBtn" onclick="toggleText()">&#128214; Show room text</button>
     </div>
   </div>
 </div>
@@ -362,15 +375,17 @@ function applyTextOpenState(){
   if(textOpen){
     el.style.maxHeight = el.scrollHeight + "px";
   } else {
-    el.style.maxHeight = "84px";
+    el.style.maxHeight = "0px";
   }
   el.classList.toggle("open", textOpen);
+  document.getElementById("readMoreBtn").innerHTML = textOpen
+    ? "&#128214; Hide room text"
+    : "&#128214; Show room text";
 }
 
 function toggleText(){
   textOpen = !textOpen;
   applyTextOpenState();
-  document.getElementById("readMoreBtn").innerHTML = textOpen?"Show less &#9650;":"Read more &#9660;";
 }
 
 function goRoom(n){
